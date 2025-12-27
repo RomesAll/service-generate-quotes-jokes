@@ -1,5 +1,5 @@
 /.venv/
-/.env_dev
+/.env
 /.env_test
 /.idea/
 /__pycache__/*.py
