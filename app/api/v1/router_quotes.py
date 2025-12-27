@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1/quotes", tags=["quotes"])
 
-@router.get("/quotes")
+@router.get("/")
 def quotes():
     pass
