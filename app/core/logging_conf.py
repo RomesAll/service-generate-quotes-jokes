@@ -1,4 +1,3 @@
-import logging
 import logging as _logging
 
 class LoggingSetup:
@@ -15,13 +14,13 @@ class LoggingSetup:
         return self.logger
 
     def create_handler_console(self, level = _logging.DEBUG, formatter: str = '%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s'):
-        console_handler = logging.StreamHandler()
+        console_handler = _logging.StreamHandler()
         console_handler.setLevel(level=level)
         console_handler.setFormatter(self.create_formatter(formatter))
         self.logger.addHandler(console_handler)
 
     def create_handler_file(self, filename: str, filemode: str, level = _logging.DEBUG, formatter: str = '%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s'):
-        file_handler = logging.FileHandler(filename=filename, mode=filemode)
+        file_handler = _logging.FileHandler(filename=filename, mode=filemode)
         file_handler.setLevel(level=level)
         file_handler.setFormatter(self.create_formatter(formatter))
         self.logger.addHandler(file_handler)

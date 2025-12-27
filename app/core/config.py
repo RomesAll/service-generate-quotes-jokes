@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
-from logging_conf import logger_setup
+from .logging_conf import logger_setup
 import os, logging
 
 load_dotenv()
@@ -15,7 +15,7 @@ class ConfigPostgres(BaseSettings):
 
     @property
     def get_database_url_sync(self):
-        return f'postgresql+psycopg//{self.POSTGRES_HOST}:{self.POSTGRES_PORT}@{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}/{self.POSTGRES_DB}'
+        return f'postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}'
 
 class Config(BaseSettings):
     postgresql: ConfigPostgres = ConfigPostgres()
