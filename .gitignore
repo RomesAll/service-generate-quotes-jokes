@@ -1,0 +1,6 @@
+/.venv/
+/.env_dev
+/.env_test
+/.idea/
+/__pycache__/*.py
+/app/database/migrations/versions/*.py
