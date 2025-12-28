@@ -18,7 +18,7 @@ class JokesService:
         return dto_object
 
     def create_jokes(self, dto_object: JokesSchemaPOST) -> JokesSchemaGET:
-        orm_object = JokesOrm(**dto_object.model_dump(exclude_none=True))
+        orm_object = JokesOrm(**dto_object.model_dump(exclude_none=True, exclude_computed_fields=True))
         result = JokesRepository(session=self.session).create_jokes(orm_object)
         dto_object_result = JokesSchemaGET.model_validate(result)
         return dto_object_result

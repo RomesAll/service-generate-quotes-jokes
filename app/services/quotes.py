@@ -29,7 +29,7 @@ class QuotesService:
         return dto_object
 
     def create_quotes(self, dto_object: QuotesSchemaPOST) -> QuotesSchemaGET:
-        orm_object = QuotesOrm(**dto_object.model_dump(exclude_none=True))
+        orm_object = QuotesOrm(**dto_object.model_dump(exclude_none=True, exclude_computed_fields=True))
         result = QuotesRepository(session=self.session).create_quotes(orm_object)
         dto_object_result = QuotesSchemaGET.model_validate(result)
         return dto_object_result
