@@ -1,5 +1,6 @@
 from app.models import AuthorOrm, QuotesOrm
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload, joinedload
 
 class QuotesRepository:
 
@@ -11,9 +12,19 @@ class QuotesRepository:
         records = self.session.execute(query)
         return records.scalars().all()
 
+    def select_all_quotes_rel(self):
+        query = select(QuotesOrm).options(joinedload(QuotesOrm.author))
+        records = self.session.execute(query)
+        return records.scalars().all()
+
     def select_quotes_by_id(self, quotes_id: int):
         orm_object = self.session.get(QuotesOrm, {'id': int(quotes_id)})
         return orm_object
+
+    def select_quotes_by_id_rel(self, author_id: int):
+        query = select(QuotesOrm).filter(QuotesOrm.id == int(author_id)).options(joinedload(QuotesOrm.author))
+        record = self.session.execute(query)
+        return record.scalar()
 
     def create_quotes(self, orm_object: QuotesOrm):
         self.session.add(orm_object)
@@ -50,9 +61,19 @@ class AuthorRepository:
         records = self.session.execute(query)
         return records.scalars().all()
 
+    def select_all_author_rel(self):
+        query = select(AuthorOrm).options(selectinload(AuthorOrm.quotes))
+        records = self.session.execute(query)
+        return records.scalars().all()
+
     def select_author_by_id(self, author_id: int):
         orm_object = self.session.get(AuthorOrm, {'id': int(author_id)})
         return orm_object
+
+    def select_author_by_id_rel(self, author_id: int):
+        query = select(AuthorOrm).filter(AuthorOrm.id == int(author_id)).options(selectinload(AuthorOrm.quotes))
+        records = self.session.execute(query)
+        return records.scalar()
 
     def create_author(self, orm_object: AuthorOrm):
         self.session.add(orm_object)
