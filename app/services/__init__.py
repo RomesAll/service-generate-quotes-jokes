@@ -1,4 +1,4 @@
-__all__ = ('QuotesService', 'JokesService')
+__all__ = ('QuotesService', 'JokesService', 'AuthorService')
 
-from .quotes import QuotesService
+from .quotes import QuotesService, AuthorService
 from .jokes import JokesService
