@@ -38,4 +38,4 @@ class JokesRepository:
             pass
         self.session.delete(orm_object)
         self.session.commit()
-        return jokes_id
+        return orm_object

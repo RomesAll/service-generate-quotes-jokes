@@ -49,7 +49,7 @@ class QuotesRepository:
             pass
         self.session.delete(orm_object)
         self.session.commit()
-        return quotes_id
+        return orm_object
 
 class AuthorRepository:
 
@@ -98,4 +98,4 @@ class AuthorRepository:
             pass
         self.session.delete(orm_object)
         self.session.commit()
-        return author_id
+        return orm_object
