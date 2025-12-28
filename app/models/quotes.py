@@ -13,4 +13,4 @@ class QuotesOrm(Base):
     author_id: Mapped[int] = mapped_column(ForeignKey('author_orm.id', ondelete='CASCADE'), nullable=True)
     count_likes: Mapped[int] = mapped_column(default=0, nullable=False)
     count_dislikes: Mapped[int] = mapped_column(default=0, nullable=False)
-    author: Mapped["AuthorOrm"] = relationship(back_populates='quote')
+    author: Mapped["AuthorOrm"] = relationship(back_populates='quotes')
