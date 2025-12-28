@@ -20,6 +20,9 @@ class QuotesSchemaGET(QuotesSchemaPOST):
 class QuotesSchemaPUT(QuotesSchemaPOST):
     id: int
 
+class QuotesSchemaRel(QuotesSchemaGET):
+    author: "AuthorSchemaGET"
+
 class AuthorSchemaPOST(BaseModel):
     fio: str = Field(default='def_fio', min_length=5, max_length=100, examples=['Петров В.В.'])
     model_config = ConfigDict(from_attributes=True)
@@ -31,3 +34,6 @@ class AuthorSchemaGET(AuthorSchemaPOST):
 
 class AuthorSchemaPUT(AuthorSchemaPOST):
     id: int
+
+class AuthorSchemaRel(AuthorSchemaGET):
+    quotes: list["QuotesSchemaGET"]
