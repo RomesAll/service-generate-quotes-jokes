@@ -11,7 +11,7 @@ class QuotesService:
         orm_objects: list[QuotesOrm] = QuotesRepository(session=self.session).select_all_quotes()
         dto_objects: list[QuotesSchemaGET] = [QuotesSchemaGET.model_validate(row) for row in orm_objects]
         return dto_objects
-
+    
     def select_quotes_by_id(self, quotes_id: int) -> QuotesSchemaGET:
         orm_object: QuotesOrm = QuotesRepository(session=self.session).select_quotes_by_id(quotes_id)
         dto_object: QuotesSchemaGET = QuotesSchemaGET.model_validate(orm_object)
