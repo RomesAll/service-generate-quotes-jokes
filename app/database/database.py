@@ -2,7 +2,6 @@ from sqlalchemy import create_engine, MetaData, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 from app.core import settings
 from datetime import datetime, timezone
-from app.core import create_primary_key
 
 engine = create_engine(url=settings.postgresql.get_database_url_sync, echo=True)
 session_maker = sessionmaker(bind=engine, expire_on_commit=False, autoflush=False, autocommit=False)

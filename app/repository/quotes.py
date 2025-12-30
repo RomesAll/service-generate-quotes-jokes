@@ -2,11 +2,12 @@ from app.models import AuthorOrm, QuotesOrm
 from sqlalchemy import select, text
 from sqlalchemy.orm import selectinload, joinedload
 from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
+from sqlalchemy.orm import Session
 
 class QuotesRepository:
 
     def __init__(self, session):
-        self.session = session
+        self.session: Session = session
 
     def select_all_quotes(self):
         query = select(QuotesOrm)
@@ -32,7 +33,7 @@ class QuotesRepository:
         return record.scalar()
 
     def create_quotes(self, orm_object: QuotesOrm):
-        if not self.session.get(QuotesOrm, {'id': int(orm_object.author_id)}):
+        if not self.session.get(AuthorOrm, {'id': int(orm_object.author_id)}):
             raise RecordNotFoundError(message="author_id not found")
         if self.session.execute(text("SELECT id FROM quotes_orm WHERE text=:text LIMIT 1"), {'text': orm_object.text}).scalar_one_or_none():
             raise DuplicateKeyError(message='text already exists')
@@ -45,7 +46,7 @@ class QuotesRepository:
         updating_record = self.session.get(QuotesOrm, {'id': int(orm_object.id)})
         if not updating_record:
             raise RecordNotFoundError(message="Quotes not found")
-        if not self.session.get(QuotesOrm, {'id': int(orm_object.author_id)}):
+        if not self.session.get(AuthorOrm, {'id': int(orm_object.author_id)}):
             raise RecordNotFoundError(message="author_id not found")
         if self.session.execute(text("SELECT id FROM quotes_orm WHERE text=:text LIMIT 1"), {'text': orm_object.text}).scalar_one_or_none():
             raise DuplicateKeyError(message='text already exists')
