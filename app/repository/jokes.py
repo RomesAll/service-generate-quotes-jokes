@@ -1,11 +1,12 @@
 from app.models import JokesOrm
 from sqlalchemy import select, text
 from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
+from sqlalchemy.orm import Session
 
 class JokesRepository:
 
     def __init__(self, session):
-        self.session = session
+        self.session: Session = session
 
     def select_all_jokes(self):
         query = select(JokesOrm)
