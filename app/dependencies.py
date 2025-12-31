@@ -1,4 +1,5 @@
 from app.database import session_maker
+from app.core import settings
 
 def get_session():
     try:
@@ -6,3 +7,4 @@ def get_session():
         yield session
     finally:
         session.close()
+

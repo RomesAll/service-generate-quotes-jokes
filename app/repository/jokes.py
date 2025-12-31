@@ -2,21 +2,28 @@ from app.models import JokesOrm
 from sqlalchemy import select, text
 from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
 from sqlalchemy.orm import Session
+from app.core import settings
 
 class JokesRepository:
 
-    def __init__(self, session):
+    def __init__(self, session, client):
         self.session: Session = session
+        self.client = client
 
     def select_all_jokes(self):
         query = select(JokesOrm)
         records = self.session.execute(query)
-        return records.scalars().all()
+        result = records.scalars().all()
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s has entered the data: %s", self.client, result)
+        return result
 
     def select_jokes_by_id(self, jokes_id: int):
         if not self.session.get(JokesOrm, {'id': int(jokes_id)}):
             raise RecordNotFoundError(message="jokes_id not found")
         orm_object = self.session.get(JokesOrm, {'id': int(jokes_id)})
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s has entered the data: %s", self.client, orm_object)
         return orm_object
 
     def create_jokes(self, orm_object: JokesOrm):
@@ -25,6 +32,8 @@ class JokesRepository:
         self.session.add(orm_object)
         self.session.flush()
         self.session.commit()
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s added the data: %s", self.client, orm_object)
         return orm_object
 
     def update_jokes(self, orm_object: JokesOrm):
@@ -38,6 +47,8 @@ class JokesRepository:
             if value:
                 setattr(updating_record, key, value)
         self.session.commit()
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s updated the data: %s", self.client, updating_record)
         return updating_record
 
     def delete_jokes(self, jokes_id: int):
@@ -46,4 +57,6 @@ class JokesRepository:
             raise RecordNotFoundError(message="Jokes not found")
         self.session.delete(orm_object)
         self.session.commit()
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s deleted the data: %s", self.client, orm_object)
         return orm_object

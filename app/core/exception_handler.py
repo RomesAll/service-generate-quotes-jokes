@@ -40,3 +40,6 @@ def exception_handler(app: FastAPI):
     def duplicate_key_error_handler(request: Request, exception: DuplicateKeyError) -> JSONResponse:
         return JSONResponse(status_code=404, content={"message": str(exception)})
 
+    @app.exception_handler(Exception)
+    def indefinite_error_handler(request: Request, exception: Exception) -> JSONResponse:
+        return JSONResponse(status_code=500, content={"message": str(exception)})
