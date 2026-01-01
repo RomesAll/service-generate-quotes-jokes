@@ -9,8 +9,25 @@ class JokesService:
         self.session = session
         self.client = client
 
-    def select_all_jokes(self) -> list[JokesSchemaGET]:
-        orm_objects: list[JokesOrm] = JokesRepository(session=self.session, client=self.client).select_all_jokes()
+    def select_jokes_by_search(self, text_joke: str = None, count_likes: int = None, count_dislikes: int = None):
+        orm_objects: list[JokesOrm] = (JokesRepository(session=self.session, client=self.client).
+                                       select_jokes_by_search(text_joke, count_likes, count_dislikes))
+        dto_objects: list[JokesSchemaGET] = [JokesSchemaGET.model_validate(row) for row in orm_objects]
+        return dto_objects
+
+    def select_filter_jokes_by_year(self, year: int, pagination):
+        orm_objects: list[JokesOrm] = (JokesRepository(session=self.session, client=self.client).
+                                       select_filter_jokes_by_year(year, pagination))
+        dto_objects: list[JokesSchemaGET] = [JokesSchemaGET.model_validate(row) for row in orm_objects]
+        return dto_objects
+
+    def select_most_popular_jokes(self, pagination):
+        orm_objects: list[JokesOrm] = (JokesRepository(session=self.session, client=self.client).select_most_popular_jokes(pagination))
+        dto_objects: list[JokesSchemaGET] = [JokesSchemaGET.model_validate(row) for row in orm_objects]
+        return dto_objects
+
+    def select_all_jokes(self, pagination) -> list[JokesSchemaGET]:
+        orm_objects: list[JokesOrm] = JokesRepository(session=self.session, client=self.client).select_all_jokes(pagination)
         dto_objects: list[JokesSchemaGET] = [JokesSchemaGET.model_validate(row) for row in orm_objects]
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s data from the "

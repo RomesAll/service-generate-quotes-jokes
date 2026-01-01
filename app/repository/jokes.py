@@ -1,5 +1,5 @@
 from app.models import JokesOrm
-from sqlalchemy import select, text
+from sqlalchemy import select, text, desc
 from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
 from sqlalchemy.orm import Session
 from app.core import settings
@@ -10,8 +10,32 @@ class JokesRepository:
         self.session: Session = session
         self.client = client
 
-    def select_all_jokes(self):
-        query = select(JokesOrm)
+    def select_jokes_by_search(self, text_joke: str = None, count_likes: int = None, count_dislikes: int = None):
+        query = None
+        if text_joke:
+            query = select(JokesOrm).filter(JokesOrm.text.contains(text_joke))
+        if count_likes:
+            query = query.filter(JokesOrm.count_likes == count_likes)
+        if count_dislikes:
+            query = query.filter(JokesOrm.count_dislikes == count_dislikes)
+        records = self.session.execute(query)
+        result = records.scalars().all()
+        return result
+
+    def select_most_popular_jokes(self, pagination):
+        query = select(JokesOrm).order_by(desc(JokesOrm.count_likes)).limit(pagination.limit).offset(pagination.offset)
+        records = self.session.execute(query)
+        result = records.scalars().all()
+        return result
+
+    def select_filter_jokes_by_year(self, year: int, pagination):
+        query = select(JokesOrm).filter(JokesOrm.year == year).limit(pagination.limit).offset(pagination.offset)
+        records = self.session.execute(query)
+        result = records.scalars().all()
+        return result
+
+    def select_all_jokes(self, pagination):
+        query = select(JokesOrm).limit(pagination.limit).offset(pagination.offset)
         records = self.session.execute(query)
         result = records.scalars().all()
         if settings.logger.isEnabledFor(10):
