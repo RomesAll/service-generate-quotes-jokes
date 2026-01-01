@@ -11,6 +11,11 @@ def get_all_jokes(request: Request, pagination: pagination_depends, session: ses
     result = JokesService(session=session, client=request.client.host).select_all_jokes(pagination)
     return {'jokes': result}
 
+@router.get("/random")
+def get_random_joke(request: Request, session: session_depends):
+    result = JokesService(session=session, client=request.client.host).select_random_jokes()
+    return {'random joke': result}
+
 @router.get("/search")
 def get_search_jokes(request: Request, search: search_depends, session: session_depends):
     result = JokesService(session=session, client=request.client.host).select_jokes_by_search(search.text, search.count_likes, search.count_dislikes)

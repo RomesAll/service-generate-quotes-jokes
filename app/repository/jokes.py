@@ -3,12 +3,21 @@ from sqlalchemy import select, text, desc
 from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
 from sqlalchemy.orm import Session
 from app.core import settings
+import random
 
 class JokesRepository:
 
     def __init__(self, session, client):
         self.session: Session = session
         self.client = client
+
+    def select_random_jokes(self):
+        query = select(JokesOrm.id).select_from(JokesOrm)
+        all_id = self.session.execute(query).scalars().all()
+        if not all_id:
+            raise IndexError('The database with jokes is empty, so it is impossible to display a random entry')
+        random_object = self.session.get(JokesOrm, {'id': random.choice(all_id)})
+        return random_object
 
     def select_jokes_by_search(self, text_joke: str = None, count_likes: int = None, count_dislikes: int = None):
         query = None

@@ -9,6 +9,11 @@ class JokesService:
         self.session = session
         self.client = client
 
+    def select_random_jokes(self):
+        orm_object: JokesOrm = JokesRepository(session=self.session, client=self.client).select_random_jokes()
+        dto_object: JokesSchemaGET = JokesSchemaGET.model_validate(orm_object)
+        return dto_object
+
     def select_jokes_by_search(self, text_joke: str = None, count_likes: int = None, count_dislikes: int = None):
         orm_objects: list[JokesOrm] = (JokesRepository(session=self.session, client=self.client).
                                        select_jokes_by_search(text_joke, count_likes, count_dislikes))
