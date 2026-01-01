@@ -1,9 +1,10 @@
 from app.models import AuthorOrm, QuotesOrm
-from sqlalchemy import select, text
+from sqlalchemy import select, text, desc
 from sqlalchemy.orm import selectinload, joinedload
 from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
 from sqlalchemy.orm import Session
 from app.core import settings
+import random
 
 class QuotesRepository:
 
@@ -11,16 +12,49 @@ class QuotesRepository:
         self.session: Session = session
         self.client = client
 
-    def select_all_quotes(self):
-        query = select(QuotesOrm)
+    def select_random_quotes(self):
+        query = select(QuotesOrm.id).select_from(QuotesOrm)
+        all_pk = self.session.execute(query).scalars().all()
+        if not all_pk:
+            raise IndexError('The database with jokes is empty, so it is impossible to display a random entry')
+        random_object = self.session.get(QuotesOrm, {'id': random.choice(all_pk)})
+        return  random_object
+
+    def select_quotes_by_search(self, text_quotes: str = None, count_likes: int = None, count_dislikes: int = None):
+        query = select(QuotesOrm).options(joinedload(QuotesOrm.author))
+        if text_quotes:
+            query = query.filter(QuotesOrm.text.contains(text_quotes))
+        if count_likes:
+            query = query.filter(QuotesOrm.count_likes == count_likes)
+        if count_dislikes:
+            query = query.filter(QuotesOrm.count_dislikes == count_dislikes)
+        records = self.session.execute(query)
+        result = records.scalars().all()
+        return result
+
+    def select_most_popular_quotes(self, pagination):
+        query = (select(QuotesOrm).options(joinedload(QuotesOrm.author)).
+                 order_by(desc(QuotesOrm.count_likes)).limit(pagination.limit).offset(pagination.offset))
+        records = self.session.execute(query)
+        result = records.scalars().all()
+        return result
+
+    def select_filter_quotes_by_year(self, year: int, pagination):
+        query = select(QuotesOrm).filter(QuotesOrm.year == year).limit(pagination.limit).offset(pagination.offset)
+        records = self.session.execute(query)
+        result = records.scalars().all()
+        return result
+
+    def select_all_quotes(self, pagination):
+        query = select(QuotesOrm).limit(pagination.limit).offset(pagination.offset)
         records = self.session.execute(query)
         result = records.scalars().all()
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s has entered the data: %s", self.client, result)
         return result
 
-    def select_all_quotes_rel(self):
-        query = select(QuotesOrm).options(joinedload(QuotesOrm.author))
+    def select_all_quotes_rel(self, pagination):
+        query = select(QuotesOrm).options(joinedload(QuotesOrm.author)).limit(pagination.limit).offset(pagination.offset)
         records = self.session.execute(query)
         result = records.scalars().all()
         if settings.logger.isEnabledFor(10):

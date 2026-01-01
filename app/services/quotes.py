@@ -10,16 +10,36 @@ class QuotesService:
         self.session = session
         self.client = client
 
-    def select_all_quotes(self) -> list[QuotesSchemaGET]:
-        orm_objects: list[QuotesOrm] = QuotesRepository(session=self.session, client=self.client).select_all_quotes()
+    def select_random_quotes(self):
+        orm_object: QuotesOrm = QuotesRepository(session=self.session, client=self.client).select_random_quotes()
+        dto_object: QuotesSchemaRel = QuotesSchemaRel.model_validate(orm_object)
+        return dto_object
+
+    def select_quotes_by_search(self, text_quotes: str = None, count_likes: int = None, count_dislikes: int = None):
+        orm_objects: list[QuotesOrm] = QuotesRepository(session=self.session,client=self.client).select_quotes_by_search(text_quotes, count_likes, count_dislikes)
+        dto_objects: list[QuotesSchemaRel] = [QuotesSchemaRel.model_validate(row) for row in orm_objects]
+        return dto_objects
+
+    def select_most_popular_quotes(self, pagination):
+        orm_objects: list[QuotesOrm] = QuotesRepository(session=self.session, client=self.client).select_most_popular_quotes(pagination)
+        dto_objects: list[QuotesSchemaRel] = [QuotesSchemaRel.model_validate(row) for row in orm_objects]
+        return dto_objects
+
+    def select_filter_quotes_by_year(self, year: int, pagination):
+        orm_objects: list[QuotesOrm] = QuotesRepository(session=self.session, client=self.client).select_filter_quotes_by_year(year, pagination)
+        dto_objects: list[QuotesSchemaGET] = [QuotesSchemaGET.model_validate(row) for row in orm_objects]
+        return dto_objects
+
+    def select_all_quotes(self, pagination) -> list[QuotesSchemaGET]:
+        orm_objects: list[QuotesOrm] = QuotesRepository(session=self.session, client=self.client).select_all_quotes(pagination)
         dto_objects: list[QuotesSchemaGET] = [QuotesSchemaGET.model_validate(row) for row in orm_objects]
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s data from the "
                                   "database was converted to a dto model, data: %s", self.client, dto_objects)
         return dto_objects
 
-    def select_all_quotes_rel(self) -> list[QuotesSchemaRel]:
-        orm_objects: list[QuotesOrm] = QuotesRepository(session=self.session, client=self.client).select_all_quotes_rel()
+    def select_all_quotes_rel(self, pagination) -> list[QuotesSchemaRel]:
+        orm_objects: list[QuotesOrm] = QuotesRepository(session=self.session, client=self.client).select_all_quotes_rel(pagination)
         dto_objects: list[QuotesSchemaRel] = [QuotesSchemaRel.model_validate(row) for row in orm_objects]
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s data from the "

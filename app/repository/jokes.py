@@ -20,9 +20,9 @@ class JokesRepository:
         return random_object
 
     def select_jokes_by_search(self, text_joke: str = None, count_likes: int = None, count_dislikes: int = None):
-        query = None
+        query = select(JokesOrm)
         if text_joke:
-            query = select(JokesOrm).filter(JokesOrm.text.contains(text_joke))
+            query = query.filter(JokesOrm.text.contains(text_joke))
         if count_likes:
             query = query.filter(JokesOrm.count_likes == count_likes)
         if count_dislikes:
