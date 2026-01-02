@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 from datetime import datetime
+import uuid
 
 class JokesSchemaPOST(BaseModel):
     text: str = Field(default='def_text', min_length=5, max_length=100, examples=['ha-ha-ha'], description='Текст шутки')
@@ -9,9 +10,9 @@ class JokesSchemaPOST(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class JokesSchemaGET(JokesSchemaPOST):
-    id: int
+    id: uuid.UUID
     created_at: datetime
     updated_ad: datetime
 
 class JokesSchemaPUT(JokesSchemaPOST):
-    id: int
+    id: uuid.UUID
