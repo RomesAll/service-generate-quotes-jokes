@@ -3,6 +3,7 @@ from app.schemas import (QuotesSchemaGET, QuotesSchemaPOST,
                          QuotesSchemaPUT, AuthorSchemaGET, AuthorSchemaPOST, AuthorSchemaPUT, AuthorSchemaRel, QuotesSchemaRel)
 from app.repository import QuotesRepository, AuthorRepository
 from app.core import settings
+import uuid
 
 class QuotesService:
 
@@ -46,7 +47,7 @@ class QuotesService:
                                   "database was converted to a dto model, data: %s", self.client, dto_objects)
         return dto_objects
 
-    def select_quotes_by_id(self, quotes_id: int) -> QuotesSchemaGET:
+    def select_quotes_by_id(self, quotes_id: uuid.UUID) -> QuotesSchemaGET:
         orm_object: QuotesOrm = QuotesRepository(session=self.session, client=self.client).select_quotes_by_id(quotes_id)
         dto_object: QuotesSchemaGET = QuotesSchemaGET.model_validate(orm_object)
         if settings.logger.isEnabledFor(10):
@@ -54,7 +55,7 @@ class QuotesService:
                                   "database was converted to a dto model, data: %s", self.client, dto_object)
         return dto_object
 
-    def select_quotes_by_id_rel(self, quotes_id: int) -> QuotesSchemaRel:
+    def select_quotes_by_id_rel(self, quotes_id: uuid.UUID) -> QuotesSchemaRel:
         orm_object: QuotesOrm = QuotesRepository(session=self.session, client=self.client).select_quotes_by_id_rel(quotes_id)
         dto_object: QuotesSchemaRel = QuotesSchemaRel.model_validate(orm_object)
         if settings.logger.isEnabledFor(10):
@@ -80,7 +81,7 @@ class QuotesService:
                                   "database was converted to a dto model, data: %s", self.client, dto_object_result)
         return dto_object_result
 
-    def delete_quotes(self, quotes_id: int) -> QuotesSchemaGET:
+    def delete_quotes(self, quotes_id: uuid.UUID) -> QuotesSchemaGET:
         result = QuotesRepository(session=self.session, client=self.client).delete_quotes(quotes_id)
         dto_object_result = QuotesSchemaGET.model_validate(result)
         if settings.logger.isEnabledFor(10):
@@ -144,8 +145,8 @@ class AuthorService:
                                   "database was converted to a dto model, data: %s", self.client, dto_object_result)
         return dto_object_result
 
-    def delete_author(self, quotes_id: int) -> AuthorSchemaGET:
-        result = AuthorRepository(session=self.session, client=self.client).delete_author(quotes_id)
+    def delete_author(self, author_id: int) -> AuthorSchemaGET:
+        result = AuthorRepository(session=self.session, client=self.client).delete_author(author_id)
         dto_object_result = AuthorSchemaGET.model_validate(result)
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s data from the "

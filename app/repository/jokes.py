@@ -4,12 +4,18 @@ from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
 from sqlalchemy.orm import Session
 from app.core import settings
 import random
+import uuid
 
 class JokesRepository:
 
     def __init__(self, session, client):
         self.session: Session = session
         self.client = client
+
+    def check_exist_pk(self, pk: uuid.UUID):
+        query = select(JokesOrm).filter(JokesOrm.id == pk)
+        records = self.session.execute(query)
+        return records.scalar_one_or_none()
 
     def select_random_jokes(self):
         query = select(JokesOrm.id).select_from(JokesOrm)
@@ -51,17 +57,21 @@ class JokesRepository:
             settings.logger.debug("client: %s has entered the data: %s", self.client, result)
         return result
 
-    def select_jokes_by_id(self, jokes_id: int):
-        if not self.session.get(JokesOrm, {'id': int(jokes_id)}):
+    def select_jokes_by_id(self, jokes_id: uuid.UUID):
+        if not self.session.get(JokesOrm, {'id': jokes_id}):
             raise RecordNotFoundError(message="jokes_id not found")
-        orm_object = self.session.get(JokesOrm, {'id': int(jokes_id)})
+        orm_object = self.session.get(JokesOrm, {'id': jokes_id})
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s has entered the data: %s", self.client, orm_object)
         return orm_object
 
     def create_jokes(self, orm_object: JokesOrm):
+        pk = uuid.uuid4()
         if self.session.execute(text("SELECT id FROM jokes_orm WHERE text=:text LIMIT 1"), {'text': orm_object.text}).scalar_one_or_none():
             raise DuplicateKeyError(message='text already exists')
+        if self.check_exist_pk(pk):
+            raise DuplicateKeyError(message='pk already exists')
+        orm_object.id = pk
         self.session.add(orm_object)
         self.session.flush()
         self.session.commit()
@@ -70,7 +80,7 @@ class JokesRepository:
         return orm_object
 
     def update_jokes(self, orm_object: JokesOrm):
-        updating_record = self.session.get(JokesOrm, {'id': int(orm_object.id)})
+        updating_record = self.session.get(JokesOrm, {'id': orm_object.id})
         if not updating_record:
             raise RecordNotFoundError(message="Jokes not found")
         if self.session.execute(text("SELECT id FROM jokes_orm WHERE text=:text LIMIT 1"), {'text': orm_object.text}).scalar_one_or_none():
@@ -84,8 +94,8 @@ class JokesRepository:
             settings.logger.debug("client: %s updated the data: %s", self.client, updating_record)
         return updating_record
 
-    def delete_jokes(self, jokes_id: int):
-        orm_object = self.session.get(JokesOrm, {'id': int(jokes_id)})
+    def delete_jokes(self, jokes_id: uuid.UUID):
+        orm_object = self.session.get(JokesOrm, {'id': jokes_id})
         if not orm_object:
             raise RecordNotFoundError(message="Jokes not found")
         self.session.delete(orm_object)

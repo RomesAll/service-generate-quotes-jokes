@@ -2,6 +2,7 @@ from app.models import JokesOrm
 from app.schemas import JokesSchemaPOST, JokesSchemaPUT, JokesSchemaGET
 from app.repository import JokesRepository
 from app.core import settings
+import uuid
 
 class JokesService:
 
@@ -39,7 +40,7 @@ class JokesService:
                                   "database was converted to a dto model, data: %s", self.client, dto_objects)
         return dto_objects
 
-    def select_jokes_by_id(self, jokes_id: int) -> JokesSchemaGET:
+    def select_jokes_by_id(self, jokes_id: uuid.UUID) -> JokesSchemaGET:
         orm_object: JokesOrm = JokesRepository(session=self.session, client=self.client).select_jokes_by_id(jokes_id)
         dto_object: JokesSchemaGET = JokesSchemaGET.model_validate(orm_object)
         if settings.logger.isEnabledFor(10):
@@ -65,7 +66,7 @@ class JokesService:
                                   "database was converted to a dto model, data: %s", self.client, dto_object_result)
         return dto_object_result
 
-    def delete_jokes(self, jokes_id: int) -> JokesSchemaGET:
+    def delete_jokes(self, jokes_id: uuid.UUID) -> JokesSchemaGET:
         result = JokesRepository(session=self.session, client=self.client).delete_jokes(jokes_id)
         dto_object_result = JokesSchemaGET.model_validate(result)
         if settings.logger.isEnabledFor(10):

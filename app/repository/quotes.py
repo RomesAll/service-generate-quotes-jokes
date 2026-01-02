@@ -5,12 +5,18 @@ from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
 from sqlalchemy.orm import Session
 from app.core import settings
 import random
+import uuid
 
 class QuotesRepository:
 
     def __init__(self, session, client):
         self.session: Session = session
         self.client = client
+
+    def check_exist_pk(self, pk: uuid.UUID):
+        query = select(QuotesOrm).filter(QuotesOrm.id == pk)
+        records = self.session.execute(query)
+        return records.scalar_one_or_none()
 
     def select_random_quotes(self):
         query = select(QuotesOrm.id).select_from(QuotesOrm)
@@ -61,18 +67,18 @@ class QuotesRepository:
             settings.logger.debug("client: %s has entered the data: %s", self.client, result)
         return result
 
-    def select_quotes_by_id(self, quotes_id: int):
-        if not self.session.get(QuotesOrm, {'id': int(quotes_id)}):
+    def select_quotes_by_id(self, quotes_id: uuid.UUID):
+        if not self.session.get(QuotesOrm, {'id': quotes_id}):
             raise RecordNotFoundError(message="quotes_id not found")
-        orm_object = self.session.get(QuotesOrm, {'id': int(quotes_id)})
+        orm_object = self.session.get(QuotesOrm, {'id': quotes_id})
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s has entered the data: %s", self.client, orm_object)
         return orm_object
 
-    def select_quotes_by_id_rel(self, quotes_id: int):
-        if not self.session.get(QuotesOrm, {'id': int(quotes_id)}):
+    def select_quotes_by_id_rel(self, quotes_id: uuid.UUID):
+        if not self.session.get(QuotesOrm, {'id': quotes_id}):
             raise RecordNotFoundError(message="quotes_id not found")
-        query = select(QuotesOrm).filter(QuotesOrm.id == int(quotes_id)).options(joinedload(QuotesOrm.author))
+        query = select(QuotesOrm).filter(QuotesOrm.id == quotes_id).options(joinedload(QuotesOrm.author))
         record = self.session.execute(query)
         result = record.scalar()
         if settings.logger.isEnabledFor(10):
@@ -80,10 +86,14 @@ class QuotesRepository:
         return result
 
     def create_quotes(self, orm_object: QuotesOrm):
+        pk = uuid.uuid4()
         if not self.session.get(AuthorOrm, {'id': int(orm_object.author_id)}):
             raise RecordNotFoundError(message="author_id not found")
         if self.session.execute(text("SELECT id FROM quotes_orm WHERE text=:text LIMIT 1"), {'text': orm_object.text}).scalar_one_or_none():
             raise DuplicateKeyError(message='text already exists')
+        if self.check_exist_pk(pk):
+            raise DuplicateKeyError(message='pk already exists')
+        orm_object.id = pk
         self.session.add(orm_object)
         self.session.flush()
         self.session.commit()
@@ -92,7 +102,7 @@ class QuotesRepository:
         return orm_object
 
     def update_quotes(self, orm_object: QuotesOrm):
-        updating_record = self.session.get(QuotesOrm, {'id': int(orm_object.id)})
+        updating_record = self.session.get(QuotesOrm, {'id': orm_object.id})
         if not updating_record:
             raise RecordNotFoundError(message="Quotes not found")
         if not self.session.get(AuthorOrm, {'id': int(orm_object.author_id)}):
@@ -108,8 +118,8 @@ class QuotesRepository:
             settings.logger.debug("client: %s updated the data: %s", self.client, updating_record)
         return updating_record
 
-    def delete_quotes(self, quotes_id: int):
-        orm_object = self.session.get(QuotesOrm, {'id': int(quotes_id)})
+    def delete_quotes(self, quotes_id: uuid.UUID):
+        orm_object = self.session.get(QuotesOrm, {'id': quotes_id})
         if not orm_object:
             raise RecordNotFoundError(message="Quotes not found")
         self.session.delete(orm_object)

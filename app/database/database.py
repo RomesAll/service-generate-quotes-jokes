@@ -14,6 +14,5 @@ class Base(DeclarativeBase):
     __abstract__ = True
     metadata = MetaData()
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"))
     updated_ad: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now())"), onupdate=get_current_time)

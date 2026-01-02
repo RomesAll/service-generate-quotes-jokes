@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 from datetime import datetime
+import uuid
 
 class QuotesSchemaPOST(BaseModel):
     text: str = Field(default='def_text', min_length=5, max_length=100, examples=['ha-ha-ha'], description='Текст цитаты')
@@ -10,12 +11,12 @@ class QuotesSchemaPOST(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class QuotesSchemaGET(QuotesSchemaPOST):
-    id: int
+    id: uuid.UUID
     created_at: datetime
     updated_ad: datetime
 
 class QuotesSchemaPUT(QuotesSchemaPOST):
-    id: int
+    id: uuid.UUID
 
 class QuotesSchemaRel(QuotesSchemaGET):
     author: "AuthorSchemaGET"

@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Request
-from sqlalchemy.orm import Session
-from app.dependencies import get_session, session_depends, pagination_depends, search_depends
+from fastapi import APIRouter, Request
+from app.dependencies import session_depends, pagination_depends, search_depends
 from app.services import QuotesService
 from app.schemas import QuotesSchemaPUT, QuotesSchemaPOST, QuotesSchemaGET
+import uuid
 
 router = APIRouter(prefix="/api/v1/quotes", tags=["quotes"])
 
@@ -37,12 +37,12 @@ def get_popular_quotes(request: Request, pagination: pagination_depends, session
     return {'most popular quotes': result}
 
 @router.get("/{quote_id}")
-def get_quotes_by_id(request: Request, quote_id, session: session_depends):
+def get_quotes_by_id(request: Request, quote_id: uuid.UUID, session: session_depends):
     result = QuotesService(session=session, client=request.client.host).select_quotes_by_id(quote_id)
     return {'quote': result}
 
 @router.get("/{quote_id}/extended")
-def get_quotes_by_id(request: Request, quote_id, session: session_depends):
+def get_quotes_by_id_rel(request: Request, quote_id: uuid.UUID, session: session_depends):
     result = QuotesService(session=session, client=request.client.host).select_quotes_by_id_rel(quote_id)
     return {'extended quote': result}
 
@@ -57,6 +57,6 @@ def update_quote(request: Request, update_object: QuotesSchemaPUT, session: sess
     return {'quote_updated': result}
 
 @router.delete("/{quote_id}")
-def delete_quote(request: Request, quote_id: int, session: session_depends):
+def delete_quote(request: Request, quote_id: uuid.UUID, session: session_depends):
     result = QuotesService(session=session, client=request.client.host).delete_quotes(quote_id)
     return {'quote_deleted': result}
