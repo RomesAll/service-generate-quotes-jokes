@@ -5,3 +5,4 @@
 /__pycache__/*.py
 /app/database/migrations/versions/*.py
 /*.log
+/app/certs/
