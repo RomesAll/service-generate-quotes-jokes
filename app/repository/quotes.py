@@ -23,8 +23,7 @@ class QuotesRepository:
         query = select(QuotesOrm.id).select_from(QuotesOrm)
         all_id = self.session.execute(query).scalars().all()
         if not all_id:
-            raise HTTPException(status_code=status.HTTP_204_NO_CONTENT,
-                                detail='The database with quotes is empty, so it is impossible to display a random entry')
+            raise HTTPException(status_code=status.HTTP_200_OK, detail='The database with quotes is empty, so it is impossible to display a random entry')
         random_object = self.session.get(QuotesOrm, {'id': random.choice(all_id)})
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s has entered the data: %s", self.client, random_object)
