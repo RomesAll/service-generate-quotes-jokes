@@ -1,8 +1,9 @@
+from fastapi import status
+from fastapi.exceptions import HTTPException
 from app.models import JokesOrm
-from sqlalchemy import select, text, desc
-from app.core.exception_handler import RecordNotFoundError, DuplicateKeyError
-from sqlalchemy.orm import Session
 from app.core import settings
+from sqlalchemy.orm import Session
+from sqlalchemy import select, text, desc
 import random
 import uuid
 
@@ -21,8 +22,11 @@ class JokesRepository:
         query = select(JokesOrm.id).select_from(JokesOrm)
         all_id = self.session.execute(query).scalars().all()
         if not all_id:
-            raise IndexError('The database with jokes is empty, so it is impossible to display a random entry')
+            raise HTTPException(status_code=status.HTTP_204_NO_CONTENT,
+                                detail='The database with jokes is empty, so it is impossible to display a random entry')
         random_object = self.session.get(JokesOrm, {'id': random.choice(all_id)})
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s has entered the data: %s", self.client, random_object)
         return random_object
 
     def select_jokes_by_search(self, text_joke: str = None, count_likes: int = None, count_dislikes: int = None):
@@ -35,18 +39,24 @@ class JokesRepository:
             query = query.filter(JokesOrm.count_dislikes == count_dislikes)
         records = self.session.execute(query)
         result = records.scalars().all()
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s has entered the data: %s", self.client, result)
         return result
 
     def select_most_popular_jokes(self, pagination):
         query = select(JokesOrm).order_by(desc(JokesOrm.count_likes)).limit(pagination.limit).offset(pagination.offset)
         records = self.session.execute(query)
         result = records.scalars().all()
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s has entered the data: %s", self.client, result)
         return result
 
     def select_filter_jokes_by_year(self, year: int, pagination):
         query = select(JokesOrm).filter(JokesOrm.year == year).limit(pagination.limit).offset(pagination.offset)
         records = self.session.execute(query)
         result = records.scalars().all()
+        if settings.logger.isEnabledFor(10):
+            settings.logger.debug("client: %s has entered the data: %s", self.client, result)
         return result
 
     def select_all_jokes(self, pagination):
@@ -58,9 +68,9 @@ class JokesRepository:
         return result
 
     def select_jokes_by_id(self, jokes_id: uuid.UUID):
-        if not self.session.get(JokesOrm, {'id': jokes_id}):
-            raise RecordNotFoundError(message="jokes_id not found")
         orm_object = self.session.get(JokesOrm, {'id': jokes_id})
+        if not orm_object:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Joke not found")
         if settings.logger.isEnabledFor(10):
             settings.logger.debug("client: %s has entered the data: %s", self.client, orm_object)
         return orm_object
@@ -68,9 +78,9 @@ class JokesRepository:
     def create_jokes(self, orm_object: JokesOrm):
         pk = uuid.uuid4()
         if self.session.execute(text("SELECT id FROM jokes_orm WHERE text=:text LIMIT 1"), {'text': orm_object.text}).scalar_one_or_none():
-            raise DuplicateKeyError(message='text already exists')
+            raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED, detail='This text joke already exists')
         if self.check_exist_pk(pk):
-            raise DuplicateKeyError(message='pk already exists')
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Id joke already exists')
         orm_object.id = pk
         self.session.add(orm_object)
         self.session.flush()
@@ -82,9 +92,9 @@ class JokesRepository:
     def update_jokes(self, orm_object: JokesOrm):
         updating_record = self.session.get(JokesOrm, {'id': orm_object.id})
         if not updating_record:
-            raise RecordNotFoundError(message="Jokes not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Joke not found")
         if self.session.execute(text("SELECT id FROM jokes_orm WHERE text=:text LIMIT 1"), {'text': orm_object.text}).scalar_one_or_none():
-            raise DuplicateKeyError(message='text already exists')
+            raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED, detail='This text joke already exists')
         for key in orm_object.__table__.columns.keys():
             value = orm_object.__dict__.get(key, None)
             if value:
@@ -97,7 +107,7 @@ class JokesRepository:
     def delete_jokes(self, jokes_id: uuid.UUID):
         orm_object = self.session.get(JokesOrm, {'id': jokes_id})
         if not orm_object:
-            raise RecordNotFoundError(message="Jokes not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Jokes not found")
         self.session.delete(orm_object)
         self.session.commit()
         if settings.logger.isEnabledFor(10):
