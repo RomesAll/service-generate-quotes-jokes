@@ -1,9 +1,10 @@
 from fastapi import Request, Response
 import uvicorn
 from fastapi import FastAPI
-from app.api.v1 import router_quotes, router_jokes, router_author, router_users
+from app.api.v1 import router_quotes, router_jokes, router_author, router_users, router_auth
 from app.core.exception_handler import exception_handler
 from app.core import settings
+from app.dependencies import http_bearer
 import time
 
 app = FastAPI()
@@ -24,6 +25,7 @@ app.include_router(router_quotes)
 app.include_router(router_jokes)
 app.include_router(router_author)
 app.include_router(router_users)
+app.include_router(router_auth)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

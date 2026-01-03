@@ -11,6 +11,7 @@ class UsersSchemaPOST(BaseModel):
 class UsersSchemaGET(UsersSchemaPOST):
     id: uuid.UUID
     password: bytes = Field(..., exclude=True)
+    active: bool
     created_at: datetime
     updated_ad: datetime
 

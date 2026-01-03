@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from app.dependencies import session_depends, pagination_depends, search_depends
+from app.dependencies import session_depends, pagination_depends, search_depends, validate_active_user_depends
 from app.services import QuotesService
 from app.schemas import QuotesSchemaPUT, QuotesSchemaPOST, QuotesSchemaGET
 import uuid
@@ -47,16 +47,19 @@ def get_quotes_by_id_rel(request: Request, quote_id: uuid.UUID, session: session
     return {'extended quote': result}
 
 @router.post("/")
-def create_quote(request: Request, new_object: QuotesSchemaPOST, session: session_depends):
+def create_quote(request: Request, new_object: QuotesSchemaPOST,
+                 session: session_depends, payload: validate_active_user_depends):
     result = QuotesService(session=session, client=request.client.host).create_quotes(new_object)
     return {'quote_added': result}
 
 @router.put("/")
-def update_quote(request: Request, update_object: QuotesSchemaPUT, session: session_depends):
+def update_quote(request: Request, update_object: QuotesSchemaPUT,
+                 session: session_depends, payload: validate_active_user_depends):
     result = QuotesService(session=session, client=request.client.host).update_quotes(update_object)
     return {'quote_updated': result}
 
 @router.delete("/{quote_id}")
-def delete_quote(request: Request, quote_id: uuid.UUID, session: session_depends):
+def delete_quote(request: Request, quote_id: uuid.UUID,
+                 session: session_depends, payload: validate_active_user_depends):
     result = QuotesService(session=session, client=request.client.host).delete_quotes(quote_id)
     return {'quote_deleted': result}

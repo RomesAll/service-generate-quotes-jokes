@@ -30,6 +30,12 @@ class UsersRepository:
             settings.logger.debug("client: %s has entered the data: %s", self.client, orm_object)
         return orm_object
 
+    def select_users_by_username(self, username: str):
+        query = select(UsersOrm).filter(UsersOrm.username == username)
+        records = self.session.execute(query)
+        result = records.scalar_one_or_none()
+        return result
+
     def create_users(self, orm_object: UsersOrm):
         pk = uuid.uuid4()
         if self.check_exist_pk(pk):

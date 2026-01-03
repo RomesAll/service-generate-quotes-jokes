@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from app.dependencies import session_depends
+from app.dependencies import session_depends, validate_active_user_depends
 from app.services import UsersService
 from app.schemas import UsersSchemaGET, UsersSchemaPOST, UsersSchemaPUT
 import uuid
@@ -17,12 +17,14 @@ def get_users_by_id(request: Request, user_id: uuid.UUID, session: session_depen
     return {'user': result}
 
 @router.post("/")
-def create_users(request: Request, new_object: UsersSchemaPOST, session: session_depends):
+def create_users(request: Request, new_object: UsersSchemaPOST,
+                 session: session_depends, payload: validate_active_user_depends):
     result = UsersService(session=session, client=request.client.host).create_users(new_object)
     return {'user_added': result}
 
 @router.put("/")
-def update_users(request: Request, update_object: UsersSchemaPUT, session: session_depends):
+def update_users(request: Request, update_object: UsersSchemaPUT,
+                 session: session_depends, payload: validate_active_user_depends):
     result = UsersService(session=session, client=request.client.host).update_users(update_object)
     return {'user_updated': result}
 
