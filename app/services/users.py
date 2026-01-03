@@ -1,7 +1,6 @@
-from app.repository import UsersRepository
-from app.core import settings
-from app.models import UsersOrm
+from app.repository import UsersRepository, UsersOrm
 from app.schemas import UsersSchemaPOST, UsersSchemaGET, UsersSchemaPUT
+from app.core import settings
 import uuid
 
 class UsersService:

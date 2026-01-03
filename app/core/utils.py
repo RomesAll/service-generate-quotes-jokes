@@ -1,6 +1,6 @@
-import jwt, bcrypt
 from app.core import settings
 from datetime import datetime, timedelta, timezone
+import jwt, bcrypt
 
 def hash_password(password: str):
     salt = bcrypt.gensalt()

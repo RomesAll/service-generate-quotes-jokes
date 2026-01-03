@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Request
-from app.services import JokesService
-from app.schemas import JokesSchemaPOST, JokesSchemaPUT
+from app.services import JokesService, JokesSchemaPOST, JokesSchemaPUT
 from app.dependencies import search_depends, pagination_depends, session_depends, validate_active_user_depends
 import uuid
 
-router = APIRouter(prefix="/api/v1/jokes", tags=["jokes"])
+router = APIRouter(prefix="/api/v1/jokes", tags=["Jokes"])
 
 @router.get("/")
 def get_all_jokes(request: Request, pagination: pagination_depends, session: session_depends):
@@ -14,22 +13,22 @@ def get_all_jokes(request: Request, pagination: pagination_depends, session: ses
 @router.get("/random")
 def get_random_joke(request: Request, session: session_depends):
     result = JokesService(session=session, client=request.client.host).select_random_jokes()
-    return {'random joke': result}
+    return {'random_joke': result}
 
 @router.get("/search")
 def get_search_jokes(request: Request, search: search_depends, session: session_depends):
     result = JokesService(session=session, client=request.client.host).select_jokes_by_search(search.text, search.count_likes, search.count_dislikes)
-    return {'found jokes': result}
+    return {'found_jokes': result}
 
 @router.get("/filter/{year}")
 def get_filter_jokes_by_year(year: int, request: Request, pagination: pagination_depends, session: session_depends):
     result = JokesService(session=session, client=request.client.host).select_filter_jokes_by_year(year, pagination)
-    return {'filtered jokes': result}
+    return {'filtered_jokes': result}
 
 @router.get("/most-popular")
 def get_popular_jokes(request: Request, pagination: pagination_depends, session: session_depends):
     result = JokesService(session=session, client=request.client.host).select_most_popular_jokes(pagination)
-    return {'most popular jokes': result}
+    return {'most_popular_jokes': result}
 
 @router.get("/{joke_id}")
 def get_jokes_by_id(request: Request, joke_id: uuid.UUID, session: session_depends):

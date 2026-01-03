@@ -1,11 +1,8 @@
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
-from app.services import AuthorService
-from app.schemas import AuthorSchemaGET, AuthorSchemaPOST, AuthorSchemaPUT
+from fastapi import APIRouter, Request
+from app.services import AuthorService, AuthorSchemaPOST, AuthorSchemaPUT
 from app.dependencies import session_depends, validate_active_user_depends
 
-router = APIRouter(prefix="/api/v1/authors", tags=["authors"])
+router = APIRouter(prefix="/api/v1/authors", tags=["Authors"])
 
 @router.get("/")
 def get_all_authors(request: Request, session: session_depends):

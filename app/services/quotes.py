@@ -1,7 +1,7 @@
-from app.models import QuotesOrm, AuthorOrm
 from app.schemas import (QuotesSchemaGET, QuotesSchemaPOST,
-                         QuotesSchemaPUT, AuthorSchemaGET, AuthorSchemaPOST, AuthorSchemaPUT, AuthorSchemaRel, QuotesSchemaRel)
-from app.repository import QuotesRepository, AuthorRepository
+                         QuotesSchemaPUT, AuthorSchemaGET, AuthorSchemaPOST,
+                         AuthorSchemaPUT, AuthorSchemaRel, QuotesSchemaRel)
+from app.repository import QuotesRepository, AuthorRepository, AuthorOrm, QuotesOrm
 from app.core import settings
 import uuid
 

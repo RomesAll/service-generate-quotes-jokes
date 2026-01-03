@@ -1,11 +1,9 @@
 from fastapi import APIRouter, Request, Response
-from app.dependencies import validate_user_info_depends
-from app.dependencies import session_depends
+from app.dependencies import validate_user_info_depends, session_depends
 from app.core.utils import encode_jwt
-from app.services import UsersService
-from app.schemas import UsersSchemaPOST
+from app.services import UsersService, UsersSchemaPOST
 
-router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 @router.post("/login")
 def login(response: Response, user: validate_user_info_depends):

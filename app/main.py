@@ -1,11 +1,8 @@
-from fastapi import Request, Response
-import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from app.api.v1 import router_quotes, router_jokes, router_author, router_users, router_auth
 from app.core.exception_handler import exception_handler
 from app.core import settings
-from app.dependencies import http_bearer
-import time
+import time, uvicorn
 
 app = FastAPI()
 

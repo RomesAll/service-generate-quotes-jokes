@@ -1,12 +1,11 @@
-from starlette import status
-from app.database import session_maker
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from app.schemas import PaginationJokesSchema, SearchJokesSchema
+from app.core.utils import decode_jwt, verify_password
 from app.repository import UsersRepository
-from app.schemas.base import PaginationJokesSchema, SearchJokesSchema
+from app.database import session_maker
 from sqlalchemy.orm import Session
 from typing import Annotated
-from app.core.utils import decode_jwt, verify_password
 import jwt
 
 http_bearer = HTTPBearer()
