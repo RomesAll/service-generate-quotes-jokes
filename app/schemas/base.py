@@ -8,3 +8,7 @@ class SearchJokesSchema(BaseModel):
 class PaginationJokesSchema(BaseModel):
     limit: int = Field(default=20, ge=0, le=100, description='Кол-во записей')
     offset: int = Field(default=0, ge=0, description='Пропустить')
+
+class CredentialsUserSchema(BaseModel):
+    username: str
+    password: str

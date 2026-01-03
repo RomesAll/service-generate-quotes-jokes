@@ -14,6 +14,7 @@ def encode_jwt(payload: dict,
                algorithm = settings.auth_jwt.algorithm,
                private_key = settings.auth_jwt.private_key_path.read_text()):
     updated_payload = payload.copy()
+    updated_payload['iat'] = datetime.now(tz=timezone.utc)
     updated_payload['exp'] = datetime.now(tz=timezone.utc) + timedelta(minutes=expires_in)
     encoded_jwt = jwt.encode(payload, private_key, algorithm=algorithm)
     return encoded_jwt
