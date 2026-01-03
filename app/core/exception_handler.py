@@ -1,45 +1,48 @@
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import DataError, DBAPIError, IntegrityError, DatabaseError
 from fastapi import FastAPI, Request
-
-class RecordNotFoundError(Exception):
-    def __init__(self, message: str):
-        self.message = message
-    def __str__(self):
-        return self.message
-
-class DuplicateKeyError(Exception):
-    def __init__(self, message: str):
-        self.message = message
-    def __str__(self):
-        return self.message
+from fastapi.exceptions import HTTPException
+from app.core.config import settings
 
 def exception_handler(app: FastAPI):
 
     @app.exception_handler(DataError)
     def data_error_handler(request: Request, exception: DataError) -> JSONResponse:
-        return JSONResponse(status_code=500, content={"message": str(exception)})
+        settings.logger.error("client: %s received an error: code: %s,  args: %s, "
+                              "params: %s, statement: %s, detail: %s", request.client.host,
+                              exception.code, exception.args, exception.params, exception.statement, exception.detail)
+        return JSONResponse(status_code=500, content={'message': 'Server error'})
 
     @app.exception_handler(DBAPIError)
-    def db_api_error_handler(request: Request, exception: DataError) -> JSONResponse:
-        return JSONResponse(status_code=500, content={"message": str(exception)})
+    def db_api_error_handler(request: Request, exception: DBAPIError) -> JSONResponse:
+        settings.logger.error("client: %s received an error: code: %s,  args: %s, "
+                              "params: %s, statement: %s, detail: %s", request.client.host,
+                              exception.code, exception.args, exception.params, exception.statement, exception.detail)
+        return JSONResponse(status_code=500, content={'message': 'Server error'})
 
     @app.exception_handler(IntegrityError)
-    def integrity_error_handler(request: Request, exception: DataError) -> JSONResponse:
-        return JSONResponse(status_code=500, content={"message": str(exception)})
+    def integrity_error_handler(request: Request, exception: IntegrityError) -> JSONResponse:
+        settings.logger.error("client: %s received an error: code: %s,  args: %s, "
+                              "params: %s, statement: %s, detail: %s", request.client.host,
+                              exception.code, exception.args, exception.params, exception.statement, exception.detail)
+        return JSONResponse(status_code=500, content={'message': 'Server error'})
 
     @app.exception_handler(DatabaseError)
-    def data_base_error_handler(request: Request, exception: DataError) -> JSONResponse:
-        return JSONResponse(status_code=500, content={"message": str(exception)})
-
-    @app.exception_handler(RecordNotFoundError)
-    def record_not_found_error_handler(request: Request, exception: RecordNotFoundError) -> JSONResponse:
-        return JSONResponse(status_code=404, content={"message": str(exception)})
-
-    @app.exception_handler(DuplicateKeyError)
-    def duplicate_key_error_handler(request: Request, exception: DuplicateKeyError) -> JSONResponse:
-        return JSONResponse(status_code=404, content={"message": str(exception)})
+    def data_base_error_handler(request: Request, exception: DatabaseError) -> JSONResponse:
+        settings.logger.error("client: %s received an error: code: %s,  args: %s, "
+                              "params: %s, statement: %s, detail: %s", request.client.host,
+                              exception.code, exception.args, exception.params, exception.statement, exception.detail)
+        return JSONResponse(status_code=500, content={'message': 'Server error'})
 
     @app.exception_handler(Exception)
     def indefinite_error_handler(request: Request, exception: Exception) -> JSONResponse:
-        return JSONResponse(status_code=500, content={"message": str(exception)})
+        settings.logger.error("client: %s received an error: args: %s", request.client.host, exception.args)
+        return JSONResponse(status_code=500, content={'message': 'Server error'})
+
+    @app.exception_handler(HTTPException)
+    def http_exception_handler(request: Request, exception: HTTPException) -> JSONResponse:
+        settings.logger.error("client: %s received an error: status: %s, detail: %s",
+                              request.client.host, exception.status_code, exception.detail)
+        if int(exception.status_code) >= 500:
+            return JSONResponse(status_code=exception.status_code, content={'message': 'Server error'})
+        return JSONResponse(status_code=exception.status_code, content={'message': exception.detail})
