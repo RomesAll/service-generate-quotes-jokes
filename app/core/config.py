@@ -1,9 +1,18 @@
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 from .logging_conf import logger_setup
+from pathlib import Path
 import os, logging
 
 load_dotenv()
+
+BASE_DIR = Path(__file__).parent.parent
+
+class AuthJWT(BaseSettings):
+    public_key_path: Path = BASE_DIR / 'certs' / 'jwt-public.pem'
+    private_key_path: Path = BASE_DIR / 'certs' / 'jwt-private.pem'
+    algorithm: str = 'RS256'
+    access_token_exp: int = 10
 
 class ConfigPostgres(BaseSettings):
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST")
@@ -19,6 +28,7 @@ class ConfigPostgres(BaseSettings):
 
 class Config(BaseSettings):
     postgresql: ConfigPostgres = ConfigPostgres()
-    logger: logging  = logger_setup.get_logger()
+    logger: logging.Logger  = logger_setup.get_logger()
+    auth_jwt: AuthJWT = AuthJWT()
 
 settings = Config()

@@ -132,7 +132,7 @@ class AuthorRepository:
 
     def __init__(self, session, client):
         self.session = session
-        self.client = None
+        self.client = client
 
     def select_all_author(self):
         query = select(AuthorOrm)

@@ -1,6 +1,5 @@
-from app.models import JokesOrm
 from app.schemas import JokesSchemaPOST, JokesSchemaPUT, JokesSchemaGET
-from app.repository import JokesRepository
+from app.repository import JokesRepository, JokesOrm
 from app.core import settings
 import uuid
 
