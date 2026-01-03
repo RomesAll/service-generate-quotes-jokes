@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 import jwt
 
-http_bearer = HTTPBearer()
+http_bearer = HTTPBearer(auto_error=False)
 
 def get_session():
     try:
