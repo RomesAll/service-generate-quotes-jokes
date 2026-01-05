@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 from .logging_conf import logger_setup
 from pathlib import Path
-import os, logging
+import os, logging, pika
 
 load_dotenv()
 
@@ -25,6 +25,12 @@ class RedisConfig(BaseSettings):
 class CacheConfig(BaseSettings):
     prefix: str = 'fastapi-cache'
 
+class RabbitMQConfig(BaseSettings):
+    mq_host: str = 'localhost'
+    mq_port: int = 5672
+    mq_user: str = 'guest'
+    mq_password: str = 'guest'
+
 class ConfigPostgres(BaseSettings):
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER")
@@ -43,5 +49,6 @@ class Config(BaseSettings):
     auth_jwt: AuthJWT = AuthJWT()
     redis: RedisConfig = RedisConfig()
     cache: CacheConfig = CacheConfig()
+    rabbitmq: RabbitMQConfig = RabbitMQConfig()
 
 settings = Config()
