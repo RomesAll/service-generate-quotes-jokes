@@ -14,6 +14,17 @@ class AuthJWT(BaseSettings):
     algorithm: str = 'RS256'
     access_token_exp: int = 10
 
+class RedisDB(BaseSettings):
+    cache: int = 0
+
+class RedisConfig(BaseSettings):
+    host: str = 'localhost'
+    port: int = 6379
+    db: RedisDB = RedisDB()
+
+class CacheConfig(BaseSettings):
+    prefix: str = 'fastapi-cache'
+
 class ConfigPostgres(BaseSettings):
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER")
@@ -30,5 +41,7 @@ class Config(BaseSettings):
     postgresql: ConfigPostgres = ConfigPostgres()
     logger: logging.Logger  = logger_setup.get_logger()
     auth_jwt: AuthJWT = AuthJWT()
+    redis: RedisConfig = RedisConfig()
+    cache: CacheConfig = CacheConfig()
 
 settings = Config()

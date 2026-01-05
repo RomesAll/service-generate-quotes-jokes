@@ -26,7 +26,7 @@ def validate_user_info(request: Request, cred: CredentialsUserSchema, session: S
     return UsersSchemaGET.model_validate(user, from_attributes=True)
 
 def validate_access_token(token: HTTPAuthorizationCredentials = Depends(http_bearer)):
-    if not token.credentials:
+    if token is None or not token.credentials:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Invalid token')
     try:
         payload = decode_jwt(token.credentials)
@@ -38,7 +38,7 @@ def validate_access_token(token: HTTPAuthorizationCredentials = Depends(http_bea
     return payload
 
 def validate_refresh_token(token: HTTPAuthorizationCredentials = Depends(http_bearer), session: Session = Depends(get_session)):
-    if not token.credentials:
+    if token is None or not token.credentials:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Invalid token')
     try:
         payload = decode_jwt(token.credentials)
@@ -50,8 +50,9 @@ def validate_refresh_token(token: HTTPAuthorizationCredentials = Depends(http_be
     except jwt.InvalidTokenError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid token error')
 
-def validate_active_user(payload = Depends(validate_access_token)):
-    if not payload.get('active', None) or not payload.get('active', False):
+def validate_active_user(payload = Depends(validate_access_token), session: Session = Depends(get_session)):
+    user = UsersRepository(session, client=None).select_users_by_id(payload.get('sub'))
+    if user is None or user.active == False:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='User is not active')
     return payload
 

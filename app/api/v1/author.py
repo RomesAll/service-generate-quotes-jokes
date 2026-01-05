@@ -1,15 +1,18 @@
 from fastapi import APIRouter, Request
 from app.services import AuthorService, AuthorSchemaPOST, AuthorSchemaPUT
 from app.dependencies import session_depends, validate_active_user_depends
+from fastapi_cache.decorator import cache
 
 router = APIRouter(prefix="/api/v1/authors", tags=["Authors"])
 
 @router.get("/")
+@cache(expire=60)
 def get_all_authors(request: Request, session: session_depends):
     result = AuthorService(session=session, client=request.client.host).select_all_author()
     return {'authors': result}
 
 @router.get("/{author_id}")
+@cache(expire=60)
 def get_author_by_id(request: Request, author_id, session: session_depends):
     result = AuthorService(session=session, client=request.client.host).select_author_by_id(author_id)
     return {'author': result}

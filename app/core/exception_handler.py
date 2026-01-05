@@ -41,8 +41,10 @@ def exception_handler(app: FastAPI):
 
     @app.exception_handler(HTTPException)
     def http_exception_handler(request: Request, exception: HTTPException) -> JSONResponse:
-        settings.logger.error("client: %s received an error: status: %s, detail: %s",
-                              request.client.host, exception.status_code, exception.detail)
         if int(exception.status_code) >= 500:
+            settings.logger.error("client: %s received an error: status: %s, detail: %s",
+                                 request.client.host, exception.status_code, exception.detail)
             return JSONResponse(status_code=exception.status_code, content={'message': 'Server error'})
+        settings.logger.info("client: %s received an error: status: %s, detail: %s",
+                              request.client.host, exception.status_code, exception.detail)
         return JSONResponse(status_code=exception.status_code, content={'message': exception.detail})
