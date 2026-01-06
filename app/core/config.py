@@ -18,8 +18,8 @@ class RedisDB(BaseSettings):
     cache: int = 0
 
 class RedisConfig(BaseSettings):
-    host: str = 'localhost'
-    port: int = 6379
+    host: str = '127.0.0.1'
+    port: int = 6380
     db: RedisDB = RedisDB()
 
 class CacheConfig(BaseSettings):
